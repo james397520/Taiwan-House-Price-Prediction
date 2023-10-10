@@ -1,141 +1,125 @@
-# # import torch
-# # from sklearn.preprocessing import StandardScaler
-# # import pandas as pd
-# # import torch
-# # from torch.utils.data import Dataset
-# # from sklearn.preprocessing import MinMaxScaler
-
-# # # Custom dataset
-# # class HousePriceDataset(Dataset):
-# #     def __init__(self, csv_file):
-# #         data = pd.read_csv(csv_file)
-# #         self.X = data.iloc[:, :-1].values
-# #         self.y = data.iloc[:, -1].values
-
-# #         # Standardize features
-# #         scaler = StandardScaler()
-# #         self.X = scaler.fit_transform(self.X)
-
-# #     def __len__(self):
-# #         return len(self.y)
-
-# #     def __getitem__(self, idx):
-# #         return torch.tensor(self.X[idx], dtype=torch.float32), torch.tensor(self.y[idx], dtype=torch.float32)
-
-
-
 import pandas as pd
 import torch
 from torch.utils.data import Dataset
 from sklearn.preprocessing import MinMaxScaler
-import zipcodetw
-
-
-
-# Custom dataset
-class HousePriceDataset(Dataset):
-    def __init__(self, csv_file, transform=None):
-        # Load data
-        data = pd.read_csv(csv_file)
-        # district_names = pd.read_csv('data/district_names.csv')
-        # name_code = pd.get_dummies(district_names['行政區名稱'])
-        # pd.DataFrame(name_code)
-        # print(name_code['行政區名稱'].tolist())
-        
-        # Drop the '備註' column
-        data = data.drop(columns=['備註'])
-        # Separate features and target variable
-
-        self.X = data.iloc[:, :-1].values
-        print(self.X.shape)
-        print(self.X[0])
-        self.size = self.X[:,4]
-        print("OG SIZE: ",self.size[0])
-        print(self.size)
-        # data['完整地址'] = data['縣市'] + data['鄉鎮市區'] + data['路名']
-        # print(data.head)
-        # print("QQQ: ",zipcodetw.find('臺北市大安區敦化南路二段'))
-        # data_dum = pd.get_dummies(data['主要用途'])
-        # pd.DataFrame(data_dum)
-        # print(data_dum.head)
-
-        self.y = data.iloc[:, -1].values.reshape(-1, 1)
-        print(type(self.X[:,4]))
-        # Apply Min-Max normalization
-        scaler_x = MinMaxScaler()
-        scaler_y = MinMaxScaler()
-        # self.X = scaler_x.fit_transform(self.X)
-        self.size = scaler_x.fit_transform(self.X[:,4].reshape(-1, 1))
-        print("fit_transform SIZE: ",self.size)
-        self.y = scaler_y.fit_transform(self.y).flatten()
-        
-        self.transform = transform
-
-    def __len__(self):
-        return len(self.y)
-
-    def __getitem__(self, idx):
-        sample = torch.tensor(self.X[idx], dtype=torch.float32), torch.tensor(self.y[idx], dtype=torch.float32)
-        
-        if self.transform:
-            sample = self.transform(sample)
-            
-        return sample
-
-
-# import pandas as pd
-# import numpy as np
-# import torch
-# from torch.utils.data import Dataset, DataLoader
-# from sklearn.preprocessing import OneHotEncoder
 # import zipcodetw
+from sklearn.preprocessing import StandardScaler, MinMaxScaler
+from torch.utils.data import Dataset, DataLoader
 
+
+
+# # Custom dataset
 # class HousePriceDataset(Dataset):
-#     def __init__(self, csv_file):
-#         # Load the dataset
-#         self.dataset = pd.read_csv(csv_file)
+#     def __init__(self, csv_file, transform=None):
+#         # Load data
+#         data = pd.read_csv(csv_file)
+#         # district_names = pd.read_csv('data/district_names.csv')
+#         # name_code = pd.get_dummies(district_names['行政區名稱'])
+#         # pd.DataFrame(name_code)
+#         # print(name_code['行政區名稱'].tolist())
+        
+#         # Drop the '備註' column
+#         # data = data.drop(columns=['備註'])
+#         # Separate features and target variable
 
-#         # Specify the columns to be one-hot encoded
-#         # self.one_hot_columns = one_hot_columns
+#         self.X = data.iloc[:, :-1].values
+#         print(self.X.shape)
+#         print(self.X[0])
+#         self.ground_size = self.X[:,4].reshape(-1, 1)
+#         self.floor = self.X[:,6].reshape(-1, 1)
+#         self.all_floor = self.X[:,7].reshape(-1, 1)
+#         self.age = self.X[:,10].reshape(-1, 1)
+#         self.house_size = self.X[:,11].reshape(-1, 1)
+#         self.parking_size = self.X[:,12].reshape(-1, 1)
+#         self.parking_cnt = self.X[:,13].reshape(-1, 1)
+#         self.lng = self.X[:,14].reshape(-1, 1)
+#         self.lat = self.X[:,15].reshape(-1, 1)
+#         self.main_size = self.X[:,17].reshape(-1, 1)
+#         self.balcony = self.X[:,18].reshape(-1, 1)
+#         self.ancillar_size = self.X[:,19].reshape(-1, 1)
 
-#         # Initialize OneHotEncoder
-#         # self.encoder = OneHotEncoder(sparse=False, handle_unknown='ignore')
-#         # self.encoder.fit(self.dataset[one_hot_columns])
+
+
+#         self.y = data.iloc[:, -1].values.reshape(-1, 1)
+#         scaler_x = MinMaxScaler()
+#         scaler_y = MinMaxScaler()
+#         self.ground_size = scaler_x.fit_transform(self.X[:,4].reshape(-1, 1))
+#         # self.X = scaler_x.fit_transform(self.X)
+#         self.ground_size = scaler_x.fit_transform(self.X[:,4].reshape(-1, 1))
+#         self.y = scaler_y.fit_transform(self.y).flatten()
+        
+#         self.transform = transform
 
 #     def __len__(self):
-#         return len(self.dataset)
+#         return len(self.y)
 
 #     def __getitem__(self, idx):
-#         # Get the data point
-#         data_point = self.dataset.iloc[idx]
-#         print(data_point)
-#         # Extract the values to be one-hot encoded
-#         # values_to_encode = data_point[self.one_hot_columns].values.reshape(1, -1)
+#         sample = torch.tensor(self.X[idx], dtype=torch.float32), torch.tensor(self.y[idx], dtype=torch.float32)
         
-#         # Perform one-hot encoding
-#         # one_hot_encoded = self.encoder.transform(values_to_encode)
+#         if self.transform:
+#             sample = self.transform(sample)
+            
+#         return sample
 
-#         # Convert to tensor
-#         # one_hot_tensor = torch.tensor(one_hot_encoded, dtype=torch.float32)
+# Z-Score Normalization Function
+def z_score_normalize(df, columns):
+    scaler = StandardScaler()
+    df[columns] = scaler.fit_transform(df[columns])
+    return df
 
-#         return data_point
+# Min-Max Normalization Function
+def min_max_normalize(df, columns):
+    scaler = MinMaxScaler()
+    df[columns] = scaler.fit_transform(df[columns])
+    return df
 
 
+
+# Custom Dataset Class with Normalization Option
+class HousePriceDataset(Dataset):
+    def __init__(self, dataframe, feature_columns, target_column, normalize_columns=None):
+        self.dataframe = dataframe.copy()  # Creating a copy to avoid modifying the original dataframe
+        
+        # Applying the specified normalization methods to the specified columns
+        if normalize_columns:
+            for column, method in normalize_columns.items():
+                if method == 'z-score':
+                    self.dataframe = z_score_normalize(self.dataframe, [column])
+                elif method == 'min-max':
+                    self.dataframe = min_max_normalize(self.dataframe, [column])
+                    
+        self.features = self.dataframe[feature_columns].values
+        self.target = self.dataframe[target_column].values
+
+    def __len__(self):
+        return len(self.dataframe)
+
+    def __getitem__(self, idx):
+        sample = {'features': torch.tensor(self.features[idx], dtype=torch.float32), 
+                  'target': torch.tensor(self.target[idx], dtype=torch.float32)}
+        return sample
 
 
 if __name__ == "__main__":
     # Load dataset
-    train_dataset = HousePriceDataset('data/training_data.csv')
-    print(train_dataset)
-    # train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+    # train_dataset = HousePriceDataset('data/training_data.csv')
+    # print(train_dataset)
 
-    # for batch_idx, (data, targets) in enumerate(train_loader):
-    #     print("QQdata",data.shape)
-    #     print("TTARGET",targets.shape)
 
-    # Usage example
-    # one_hot_columns = ['縣市']  # Specify the columns to be one-hot encoded
-    # dataset = HousePriceDataset('data/training_data.csv', one_hot_columns)
+    data = pd.read_csv('data/training_data.csv')
+    # 指定要標準化的列和標準化方法
+    normalize_columns = {
+    '土地面積': 'z-score',
+    '建物面積': 'min-max'
+    }
 
-    # Print the one-hot encoded features of the first data point
-    # print(dataset[0].shape)
+    # 選擇要用作特徵的列
+    selected_features = ['土地面積', '建物面積']
+    target_column = '單價'
+
+    # 創建標準化後的數據集
+    normalized_dataset = HousePriceDataset(data, selected_features, target_column, normalize_columns)
+
+    # 訪問標準化後的數據集中的樣本
+    sample = normalized_dataset[0]  # 這將顯示標準化後的第一個樣本
+    print(sample)
