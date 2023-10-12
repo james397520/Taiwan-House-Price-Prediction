@@ -51,9 +51,9 @@ def min_max_denormalize(df, columns, scaler_path):
 
 # Custom Dataset Class with Normalization Option
 class HousePriceTrainDataset(Dataset):
-    def __init__(self, dataframe, feature_columns, target_column, normalize_columns=None):
+    def __init__(self, dataframe, target_column, normalize_columns=None):
         self.dataframe = dataframe.copy()  # Creating a copy to avoid modifying the original dataframe
-        
+        feature_list=[]
         # Applying the specified normalization methods to the specified columns
         if normalize_columns:
             for column, method in normalize_columns.items():
@@ -61,9 +61,10 @@ class HousePriceTrainDataset(Dataset):
                     self.dataframe = z_score_normalize(self.dataframe, [column],save_scaler_path ="pkl/" + column + "_z_score_normalize_data.pkl")
                 elif method == 'min-max':
                     self.dataframe = min_max_normalize(self.dataframe, [column],save_scaler_path ="pkl/" + column + "_min_max_normalize_data.pkl")
+                feature_list.append(column)
         self.dataframe = min_max_normalize(self.dataframe, [target_column],save_scaler_path="pkl/" + target_column + "_min_max_normalize_data.pkl")
 
-        self.features = self.dataframe[feature_columns].values
+        self.features = self.dataframe[feature_list].values
         self.target = self.dataframe[target_column].values
         
     def __len__(self):
@@ -76,19 +77,21 @@ class HousePriceTrainDataset(Dataset):
 
 
 class HousePriceTestDataset(Dataset):
-    def __init__(self, dataframe, feature_columns, normalize_columns=None):
+    def __init__(self, dataframe, normalize_columns=None):
         self.dataframe = dataframe.copy()  # Creating a copy to avoid modifying the original dataframe
-        
+        feature_list = []
         # Applying the specified normalization methods to the specified columns
         if normalize_columns:
+            
             for column, method in normalize_columns.items():
                 if method == 'z-score':
                     self.dataframe = z_score_normalize(self.dataframe, [column],save_scaler_path ="pkl/" + column + "_z_score_normalize_data.pkl")
                 elif method == 'min-max':
                     self.dataframe = min_max_normalize(self.dataframe, [column],save_scaler_path ="pkl/" + column + "_min_max_normalize_data.pkl")
+                feature_list.append(column)
 
-        
-        self.features = self.dataframe[feature_columns].values
+        print(feature_list)
+        self.features = self.dataframe[feature_list].values
 
 
     def __len__(self):

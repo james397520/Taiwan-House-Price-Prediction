@@ -16,12 +16,20 @@ def main():
     data = pd.read_csv('data/training_data.csv')
     # 指定要標準化的列和標準化方法
     normalize_columns = {
+    '土地面積': 'min-max',
+    '移轉層次': 'min-max',
+    '總樓層數': 'min-max',
+    '屋齡': 'min-max',
+    '建物面積': 'min-max',
+    '車位面積': 'min-max',
+    '車位個數': 'min-max',
     '橫坐標': 'min-max', #z-score
-    '縱坐標': 'min-max'
+    '縱坐標': 'min-max',
+    '主建物面積': 'min-max',
+    '陽台面積': 'min-max',
+    '附屬建物面積': 'min-max',
     }
 
-    # 選擇要用作特徵的列
-    selected_features = ['橫坐標', '縱坐標']
     target_column = '單價'
     if platform.system() == "Linux":
         gpu = True
@@ -29,7 +37,7 @@ def main():
         gpu = False
 
     # 創建標準化後的數據集
-    train_dataset = HousePriceTrainDataset(data, selected_features, target_column, normalize_columns)
+    train_dataset = HousePriceTrainDataset(data, target_column, normalize_columns)
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 
     # print(train_dataset[0]["features"].shape)
