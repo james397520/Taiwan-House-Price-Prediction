@@ -61,10 +61,11 @@ class HousePriceTrainDataset(Dataset):
                     self.dataframe = z_score_normalize(self.dataframe, [column],save_scaler_path="z_score_normalize_data.pkl")
                 elif method == 'min-max':
                     self.dataframe = min_max_normalize(self.dataframe, [column],save_scaler_path="min_max_normalize_data.pkl")
+        self.dataframe = min_max_normalize(self.dataframe, [target_column],save_scaler_path="label_min_max_normalize_data.pkl")
 
         self.features = self.dataframe[feature_columns].values
         self.target = self.dataframe[target_column].values
-
+        
     def __len__(self):
         return len(self.dataframe)
 
@@ -82,10 +83,11 @@ class HousePriceTestDataset(Dataset):
         if normalize_columns:
             for column, method in normalize_columns.items():
                 if method == 'z-score':
-                    self.dataframe = z_score_normalize(self.dataframe, [column])
+                    self.dataframe = z_score_normalize(self.dataframe, [column],save_scaler_path="z_score_normalize_data.pkl")
                 elif method == 'min-max':
-                    self.dataframe = min_max_normalize(self.dataframe, [column])
+                    self.dataframe = min_max_normalize(self.dataframe, [column],save_scaler_path="min_max_normalize_data.pkl")
 
+        
         self.features = self.dataframe[feature_columns].values
 
 
