@@ -4,7 +4,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.data import Dataset, DataLoader
-from model import HousePriceModel
+from model import HousePriceModel, TransformerRegressor
 from dataloader import  HousePriceTestDataset, min_max_denormalize, z_score_denormalize
 import platform
 
@@ -41,10 +41,12 @@ def inference():
     # Load Model
     model_path = 'model.pth'  # Update with the path of your trained model file
     input_dim = len(normalize_columns.keys())
+    model = HousePriceModel(input_dim)
+    model = TransformerRegressor(input_dim, 4, 6)
     if gpu:
-        model = HousePriceModel(input_dim).cuda()
+        model = model.cuda()
     else:
-        model = HousePriceModel(input_dim)
+        model = model
     model.load_state_dict(torch.load(model_path))
     model.eval()
 

@@ -2,7 +2,7 @@ import torch
 import pandas as pd
 from torch.utils.data import Dataset, DataLoader
 from sklearn.preprocessing import StandardScaler
-from model import HousePriceModel
+from model import HousePriceModel, TransformerRegressor
 from dataloader import HousePriceTrainDataset
 import platform
 
@@ -40,12 +40,16 @@ def main():
     train_dataset = HousePriceTrainDataset(data, target_column, normalize_columns)
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 
-    # print(train_dataset[0]["features"].shape)
+    input_dim = len(normalize_columns.keys())
+    print(input_dim)
     # Initialize model
+    # model = HousePriceModel(input_dim)
+    model = TransformerRegressor(input_dim, 4, 6)
+
     if gpu:
-        model = HousePriceModel(train_dataset[0]["features"].shape[0]).cuda()
+        model = model.cuda()
     else:
-        model = HousePriceModel(train_dataset[0]["features"].shape[0])
+        model = model
 
     # Loss and optimizer
     criterion = torch.nn.MSELoss()
@@ -60,10 +64,7 @@ def main():
             else:
                 data = batch['features']
                 targets = batch['target']
-        # for batch_idx, (data, targets) in enumerate(train_loader):
-        #     data, targets = data.cuda(), targets.cuda() #cuda()
-        #     print(data)
-            # Forward pass
+
             scores = model(data)
             loss = criterion(scores.squeeze(1), targets)
 
