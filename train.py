@@ -3,6 +3,7 @@ import pandas as pd
 from torch.utils.data import Dataset, DataLoader
 from sklearn.preprocessing import StandardScaler
 from model.model import HousePriceModel, TransformerRegressor
+from model.model_v2 import HousePriceModel_CNN
 from dataloader import HousePriceTrainDataset
 import platform
 
@@ -20,7 +21,7 @@ def main():
     '移轉層次': 'min-max',
     '總樓層數': 'min-max',
     '屋齡': 'min-max',
-    # '建物面積': 'min-max',
+    '建物面積': 'min-max',
     '車位面積': 'min-max',
     '車位個數': 'min-max',
     '橫坐標': 'min-max', #z-score
@@ -44,7 +45,8 @@ def main():
     print(input_dim)
     # Initialize model
     # model = HousePriceModel(input_dim)
-    model = TransformerRegressor(input_dim, 4, 11)
+    # model = TransformerRegressor(input_dim, 4, 6)
+    model = HousePriceModel_CNN(input_dim)
 
     if gpu:
         model = model.cuda()
@@ -58,6 +60,8 @@ def main():
     # Training loop
     for epoch in range(epochs):
         for batch in train_loader:
+            # print(batch['features'].shape)
+            # print(batch['target'].shape)
             if gpu:
                 data = batch['features'].cuda()
                 targets = batch['target'].cuda()
