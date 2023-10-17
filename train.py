@@ -11,12 +11,17 @@ def main():
 
     # Hyperparameters
     batch_size = 128
-    learning_rate = 0.001
+    learning_rate = 1e-3
     epochs = 100
 
     data = pd.read_csv('data/training_data.csv')
     # 指定要標準化的列和標準化方法
     normalize_columns = {
+    '地區':'one-hot-encoding',
+    '使用分區':'one-hot-encoding',
+    '主要用途':'one-hot-encoding',
+    '主要建材':'one-hot-encoding',
+    '建物型態':'one-hot-encoding',
     '土地面積': 'min-max',
     '移轉層次': 'min-max',
     '總樓層數': 'min-max',
@@ -45,8 +50,8 @@ def main():
     print(input_dim)
     # Initialize model
     # model = HousePriceModel(input_dim)
-    # model = TransformerRegressor(input_dim, 4, 6)
-    model = HousePriceModel_CNN(input_dim)
+    model = TransformerRegressor(input_dim, 4, 6)
+    # model = HousePriceModel_CNN(input_dim)
 
     if gpu:
         model = model.cuda()
@@ -60,8 +65,8 @@ def main():
     # Training loop
     for epoch in range(epochs):
         for batch in train_loader:
-            # print(batch['features'].shape)
-            # print(batch['target'].shape)
+            print(batch['features'].shape)
+            print(batch['target'].shape)
             if gpu:
                 data = batch['features'].cuda()
                 targets = batch['target'].cuda()
@@ -80,7 +85,7 @@ def main():
         print(f'Epoch [{epoch+1}/{epochs}], Loss: {loss.item():.4f}')
 
     # Save the trained model
-    torch.save(model.state_dict(), 'model.pth')
+    torch.save(model.state_dict(), 'model_cnn.pth')
 
 
 

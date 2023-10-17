@@ -40,11 +40,11 @@ def inference():
     data_loader = DataLoader(dataset, batch_size=len(dataset), shuffle=False)
 
     # Load Model
-    model_path = 'model.pth'  # Update with the path of your trained model file
+    model_path = 'model_cnn.pth'  # Update with the path of your trained model file
     input_dim = len(normalize_columns.keys())
-    # model = HousePriceModel(input_dim)
+    model = HousePriceModel(input_dim)
     # model = TransformerRegressor(input_dim, 4, 6)
-    model = HousePriceModel_CNN(input_dim)
+    # model = HousePriceModel_CNN(input_dim)
     if gpu:
         model = model.cuda()
     else:
@@ -66,6 +66,8 @@ def inference():
     ids = [f"PU-{i}" for i in range(1, len(predictions) + 1)]  # Adjust ID format as needed
     predicted_prices_df = pd.DataFrame({"ID": ids, "predicted_price": predictions})
     predicted_prices_df = min_max_denormalize(predicted_prices_df, ["predicted_price"],scaler_path="pkl/單價_min_max_normalize_data.pkl")
+    # predicted_prices_df = z_score_denormalize(predicted_prices_df, ["predicted_price"],scaler_path="pkl/單價_z_score_normalize_data.pkl")
+
     # Save to CSV
     output_csv_path = 'predicted_prices.csv'  # Update with the desired output path
     predicted_prices_df.to_csv(output_csv_path, index=False)

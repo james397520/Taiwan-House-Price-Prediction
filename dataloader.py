@@ -6,7 +6,7 @@ from sklearn.preprocessing import MinMaxScaler
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from torch.utils.data import Dataset, DataLoader
 import pickle
-
+import numpy as np
 
 
 # Z-Score Normalization Function
@@ -31,6 +31,10 @@ def min_max_normalize(df, columns, save_scaler_path=None):
             
     return df
 
+# 定義 sigmoid 函數
+def sigmoid(x):
+    return 1 / (1 + np.exp(-x))
+
 # Denormalization Function for Z-Score
 def z_score_denormalize(df, columns, scaler_path):
     with open(scaler_path, 'rb') as f:
@@ -47,12 +51,29 @@ def min_max_denormalize(df, columns, scaler_path):
     df[columns] = scaler.inverse_transform(df[columns])
     return df
 
+# 加入 One-Hot Encoding 的功能
+def one_hot_encode(df):
+    
+    
+    # 選擇需要進行 One-Hot Encoding 的列
+    columns_to_encode = ['地區', '使用分區', '主要用途', '主要建材', '建物型態']
+    
+    # 使用 pandas 的 get_dummies 函數進行 One-Hot Encoding
+    df_encoded = pd.get_dummies(df, columns=columns_to_encode)
+    
+    return df_encoded
+
+# 你可以在加載和預處理數據的時候調用這個函數
+
+
 
 
 # Custom Dataset Class with Normalization Option
 class HousePriceTrainDataset(Dataset):
     def __init__(self, dataframe, target_column, normalize_columns=None):
         self.dataframe = dataframe.copy()  # Creating a copy to avoid modifying the original dataframe
+        # 合併 '縣市' 和 '鄉鎮市區' 列
+        self.dataframe['地區'] = self.dataframe['縣市'] + self.dataframe['鄉鎮市區']
         feature_list=[]
         # Applying the specified normalization methods to the specified columns
         if normalize_columns:
@@ -61,9 +82,14 @@ class HousePriceTrainDataset(Dataset):
                     self.dataframe = z_score_normalize(self.dataframe, [column],save_scaler_path ="pkl/" + column + "_z_score_normalize_data.pkl")
                 elif method == 'min-max':
                     self.dataframe = min_max_normalize(self.dataframe, [column],save_scaler_path ="pkl/" + column + "_min_max_normalize_data.pkl")
-                feature_list.append(column)
-        self.dataframe = min_max_normalize(self.dataframe, [target_column],save_scaler_path="pkl/" + target_column + "_min_max_normalize_data.pkl")
 
+            feature_list.append(column)
+        self.dataframe = one_hot_encode(self.dataframe)
+        self.dataframe = min_max_normalize(self.dataframe, [target_column],save_scaler_path="pkl/" + target_column + "_min_max_normalize_data.pkl")
+        # self.dataframe = z_score_normalize(self.dataframe, [target_column],save_scaler_path="pkl/" + target_column + "_z_score_normalize_data.pkl")
+
+        # self.dataframe[target_column].apply(sigmoid)
+        print(self.dataframe[feature_list].head)
         self.features = self.dataframe[feature_list].values
         self.target = self.dataframe[target_column].values
         
@@ -122,7 +148,7 @@ if __name__ == "__main__":
 
     # 創建標準化後的數據集
     normalized_dataset = HousePriceTrainDataset(data, selected_features, target_column, normalize_columns)
-
+    
     # 訪問標準化後的數據集中的樣本
     sample = normalized_dataset[0]  # 這將顯示標準化後的第一個樣本
     print(sample)
