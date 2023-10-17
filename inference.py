@@ -4,7 +4,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.data import Dataset, DataLoader
-from model import HousePriceModel, TransformerRegressor
+from model.model import HousePriceModel, TransformerRegressor
 from dataloader import  HousePriceTestDataset, min_max_denormalize, z_score_denormalize
 import platform
 
