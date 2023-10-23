@@ -4,7 +4,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.data import Dataset, DataLoader
-from model.model import HousePriceModel, TransformerRegressor
+# from model.model import HousePriceModel, TransformerRegressor
+from model.model_v3 import HousePriceModel, TransformerRegressor
 from model.model_v2 import HousePriceModel_CNN
 from dataloader import  HousePriceTestDataset, min_max_denormalize, z_score_denormalize
 import platform
@@ -13,10 +14,16 @@ import platform
 
 def inference():
     # Load Data
-    data_path = 'data/public_dataset.csv'  # Update with the path of your data file
+    data_path = 'data/reordered_final_public_dataset.csv'  # Update with the path of your data file
     data = pd.read_csv(data_path)
     # normalize_columns = {'橫坐標': 'min-max', '縱坐標': 'min-max'}
     normalize_columns = {
+    # '地區':'one-hot-encoding',
+    # '使用分區':'one-hot-encoding',
+    # '主要用途':'one-hot-encoding',
+    # '主要建材':'one-hot-encoding',
+    # '建物型態':'one-hot-encoding',
+    '行政區編號': 'one-hot-code',
     '土地面積': 'min-max',
     '移轉層次': 'min-max',
     '總樓層數': 'min-max',
@@ -41,7 +48,7 @@ def inference():
 
     # Load Model
     model_path = 'model_cnn.pth'  # Update with the path of your trained model file
-    input_dim = len(normalize_columns.keys())
+    input_dim = len(normalize_columns.keys())-1
     model = HousePriceModel(input_dim)
     # model = TransformerRegressor(input_dim, 4, 6)
     # model = HousePriceModel_CNN(input_dim)

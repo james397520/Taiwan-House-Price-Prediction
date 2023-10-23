@@ -71,7 +71,7 @@ def one_hot_encode(ids, num_classes):
         
     # 使用 PyTorch 的 one_hot 函數來轉換
     one_hot_encoded = F.one_hot(ids, num_classes)
-    return one_hot_encoded
+    return one_hot_encoded.float()
 
 
 # Custom Dataset Class with Normalization Option

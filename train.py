@@ -2,7 +2,8 @@ import torch
 import pandas as pd
 from torch.utils.data import Dataset, DataLoader
 from sklearn.preprocessing import StandardScaler
-from model.model import HousePriceModel, TransformerRegressor
+# from model.model import HousePriceModel, TransformerRegressor
+from model.model_v3 import HousePriceModel, TransformerRegressor
 from model.model_v2 import HousePriceModel_CNN
 from dataloader import HousePriceTrainDataset
 import platform
@@ -14,14 +15,15 @@ def main():
     learning_rate = 1e-3
     epochs = 100
 
-    data = pd.read_csv('data/training_data.csv')
+    data = pd.read_csv('data/reordered_final_training_data.csv')
     # 指定要標準化的列和標準化方法
     normalize_columns = {
-    '地區':'one-hot-encoding',
-    '使用分區':'one-hot-encoding',
-    '主要用途':'one-hot-encoding',
-    '主要建材':'one-hot-encoding',
-    '建物型態':'one-hot-encoding',
+    # '地區':'one-hot-encoding',
+    # '使用分區':'one-hot-encoding',
+    # '主要用途':'one-hot-encoding',
+    # '主要建材':'one-hot-encoding',
+    # '建物型態':'one-hot-encoding',
+    '行政區編號': 'one-hot-code',
     '土地面積': 'min-max',
     '移轉層次': 'min-max',
     '總樓層數': 'min-max',
@@ -46,11 +48,11 @@ def main():
     train_dataset = HousePriceTrainDataset(data, target_column, normalize_columns)
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 
-    input_dim = len(normalize_columns.keys())
+    input_dim = len(normalize_columns.keys())-1
     print(input_dim)
     # Initialize model
-    # model = HousePriceModel(input_dim)
-    model = TransformerRegressor(input_dim, 4, 6)
+    model = HousePriceModel(input_dim)
+    # model = TransformerRegressor(input_dim, 4, 6)
     # model = HousePriceModel_CNN(input_dim)
 
     if gpu:
@@ -65,8 +67,8 @@ def main():
     # Training loop
     for epoch in range(epochs):
         for batch in train_loader:
-            print(batch['features'].shape)
-            print(batch['target'].shape)
+            # print(batch['features'].shape)
+            # print(batch['target'].shape)
             if gpu:
                 data = batch['features'].cuda()
                 targets = batch['target'].cuda()
