@@ -2,12 +2,24 @@ import pandas as pd
 import torch
 from torch.utils.data import Dataset
 from sklearn.preprocessing import MinMaxScaler
+import os
 # import zipcodetw
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from torch.utils.data import Dataset, DataLoader
 import pickle
 import numpy as np
 
+def check_and_create_directory(directory_name):
+    # 組合完整的資料夾路徑
+    dir_path = os.path.join(os.getcwd(), directory_name)
+    
+    # 檢查資料夾是否存在
+    if not os.path.exists(dir_path):
+        # 如果不存在，則建立資料夾
+        os.makedirs(dir_path)
+        print(f"Directory '{directory_name}' created.")
+    else:
+        print(f"Directory '{directory_name}' already exists.")
 
 
 # Z-Score Normalization Function
@@ -89,6 +101,7 @@ class HousePriceTrainDataset(Dataset):
         # 合併 '縣市' 和 '鄉鎮市區' 列
         self.dataframe['行政區名稱'] = self.dataframe['縣市'] + self.dataframe['鄉鎮市區']
         feature_list=[]
+        check_and_create_directory("pkl")
         # Applying the specified normalization methods to the specified columns
         if normalize_columns:
             for column, method in normalize_columns.items():
