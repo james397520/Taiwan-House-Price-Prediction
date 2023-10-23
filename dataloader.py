@@ -1,5 +1,6 @@
 import pandas as pd
 import torch
+import torch.nn.functional as F
 from torch.utils.data import Dataset
 from sklearn.preprocessing import MinMaxScaler
 import os
@@ -65,30 +66,12 @@ def min_max_denormalize(df, columns, scaler_path):
     return df
 
 # 加入 One-Hot Encoding 的功能
-def one_hot_encode(df):
-    
-    
-    # 選擇需要進行 One-Hot Encoding 的列
-    columns_to_encode = ['使用分區', '主要用途', '主要建材', '建物型態']
-    
-    # 使用 pandas 的 get_dummies 函數進行 One-Hot Encoding
-    df_encoded = pd.get_dummies(df, columns=columns_to_encode)
-    
-    return df_encoded
-
-# Function to get the district ID based on the city and district names
-def get_district_id(city: str, district: str, area_df: pd.DataFrame) -> int:
-    full_name = city + district
-    print(full_name)
-    # print(area_df['行政區名稱'])
-    if area_df['行政區名稱'] == full_name:
-        print(full_name)
-    matching_row = area_df[area_df['行政區名稱'] == full_name]
-    # print(matching_row)
-    return matching_row['行政區編號'].values[0] if not matching_row.empty else None
-
-
-
+def one_hot_encode(ids, num_classes):
+    ids = torch.tensor(int(ids))
+        
+    # 使用 PyTorch 的 one_hot 函數來轉換
+    one_hot_encoded = F.one_hot(ids, num_classes)
+    return one_hot_encoded
 
 
 # Custom Dataset Class with Normalization Option
@@ -98,8 +81,7 @@ class HousePriceTrainDataset(Dataset):
         area_file_path = 'data/area.csv'
         self.area_df = pd.read_csv(area_file_path)
         self.dataframe = dataframe.copy()  # Creating a copy to avoid modifying the original dataframe
-        # 合併 '縣市' 和 '鄉鎮市區' 列
-        self.dataframe['行政區名稱'] = self.dataframe['縣市'] + self.dataframe['鄉鎮市區']
+
         feature_list=[]
         check_and_create_directory("pkl")
         # Applying the specified normalization methods to the specified columns
@@ -110,20 +92,12 @@ class HousePriceTrainDataset(Dataset):
                 elif method == 'min-max':
                     self.dataframe = min_max_normalize(self.dataframe, [column],save_scaler_path ="pkl/" + column + "_min_max_normalize_data.pkl")
                 feature_list.append(column)
-        print('QQQS',feature_list)
-        # self.dataframe = one_hot_encode(self.dataframe)
-        # self.dataframe = one_hot_encode(self.dataframe)
-        # print(self.area_df['行政區名稱'])
-        # Add a new column to the training data DataFrame to store the district IDs
-        # self.dataframe['行政區編號'] = self.dataframe.apply(
-        #     lambda row: get_district_id(row['縣市'], row['鄉鎮市區'], self.area_df), axis=1)
 
+        print('feature_list',feature_list)
 
         self.dataframe = min_max_normalize(self.dataframe, [target_column],save_scaler_path="pkl/" + target_column + "_min_max_normalize_data.pkl")
         # self.dataframe = z_score_normalize(self.dataframe, [target_column],save_scaler_path="pkl/" + target_column + "_z_score_normalize_data.pkl")
 
-        # self.dataframe[target_column].apply(sigmoid)
-        # print(self.dataframe[feature_list].head)
         self.features = self.dataframe[feature_list].values
         self.target = self.dataframe[target_column].values
         
@@ -131,8 +105,11 @@ class HousePriceTrainDataset(Dataset):
         return len(self.dataframe)
 
     def __getitem__(self, idx):
-        print(self.features[idx])
-        sample = {'features': torch.tensor(self.features[idx], dtype=torch.float32), 
+        # print(self.features[idx])
+        input = self.features[idx]
+        area_code = one_hot_encode(input[0],368)
+        # print('area_code',area_code.shape)
+        sample = {'features': [area_code,torch.tensor(input[1:], dtype=torch.float32)], 
                   'target': torch.tensor(self.target[idx], dtype=torch.float32)}
         return sample
 
@@ -159,20 +136,20 @@ class HousePriceTestDataset(Dataset):
         return len(self.dataframe)
 
     def __getitem__(self, idx):
-        sample = {'features': torch.tensor(self.features[idx], dtype=torch.float32)
+        input = self.features[idx]
+        area_code = one_hot_encode(input[0],368)
+        # print('area_code',area_code.shape)
+        sample = {'features': [area_code,torch.tensor(input[1:], dtype=torch.float32)]
                   }
         return sample
 
 
 if __name__ == "__main__":
     # Load dataset
-    # train_dataset = HousePriceDataset('data/training_data.csv')
-    # print(train_dataset)
-
-
-    data = pd.read_csv('data/training_data.csv')
+    data = pd.read_csv('data/reordered_final_training_data.csv')
     # 指定要標準化的列和標準化方法
     normalize_columns = {
+    '行政區編號': 'one-hot-code',
     '橫坐標': 'min-max', #z-score
     '縱坐標': 'min-max'
     }
