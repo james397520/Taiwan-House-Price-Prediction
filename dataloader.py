@@ -78,8 +78,6 @@ def one_hot_encode(ids, num_classes):
 class HousePriceTrainDataset(Dataset):
     def __init__(self, dataframe, target_column, normalize_columns=None):
         # Load area data
-        area_file_path = 'data/area.csv'
-        self.area_df = pd.read_csv(area_file_path)
         self.dataframe = dataframe.copy()  # Creating a copy to avoid modifying the original dataframe
 
         feature_list=[]
