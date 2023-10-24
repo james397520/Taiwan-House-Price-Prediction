@@ -14,16 +14,15 @@ import platform
 
 def inference():
     # Load Data
-    data_path = 'data/reordered_final_public_dataset.csv'  # Update with the path of your data file
+    data_path = 'data/final_updated_public_dataset.csv'  # Update with the path of your data file
     data = pd.read_csv(data_path)
     # normalize_columns = {'橫坐標': 'min-max', '縱坐標': 'min-max'}
     normalize_columns = {
-    # '地區':'one-hot-encoding',
-    # '使用分區':'one-hot-encoding',
-    # '主要用途':'one-hot-encoding',
-    # '主要建材':'one-hot-encoding',
-    # '建物型態':'one-hot-encoding',
-    '行政區編號': 'one-hot-code',
+    '行政區編號': 'one-hot-encoding', #area_code
+    '使用分區':'one-hot-encoding', #building_class
+    '主要用途':'one-hot-encoding', #building_usage
+    '主要建材':'one-hot-encoding', #building_material
+    '建物型態':'one-hot-encoding', #building_style
     '土地面積': 'min-max',
     '移轉層次': 'min-max',
     '總樓層數': 'min-max',
@@ -48,7 +47,7 @@ def inference():
 
     # Load Model
     model_path = 'model_cnn.pth'  # Update with the path of your trained model file
-    input_dim = len(normalize_columns.keys())-1
+    input_dim = 12 #len(normalize_columns.keys())-1
     model = HousePriceModel(input_dim)
     # model = TransformerRegressor(input_dim, 4, 6)
     # model = HousePriceModel_CNN(input_dim)
@@ -64,8 +63,8 @@ def inference():
         for batch in data_loader:
             if gpu:
                 data = batch['features']
-                data[0] = data[0].cuda()
-                data[1] = data[1].cuda()
+                for i in range(len(data)):
+                    data[i] = data[i].cuda()
             else:
                 data = batch['features']
             

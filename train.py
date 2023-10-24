@@ -15,15 +15,14 @@ def main():
     learning_rate = 1e-3
     epochs = 100
 
-    data = pd.read_csv('data/reordered_final_training_data.csv')
+    data = pd.read_csv('data/final_updated_training_data.csv')
     # 指定要標準化的列和標準化方法
     normalize_columns = {
-    # '地區':'one-hot-encoding',
-    # '使用分區':'one-hot-encoding',
-    # '主要用途':'one-hot-encoding',
-    # '主要建材':'one-hot-encoding',
-    # '建物型態':'one-hot-encoding',
-    '行政區編號': 'one-hot-code',
+    '行政區編號': 'one-hot-encoding',
+    '使用分區':'one-hot-encoding',
+    '主要用途':'one-hot-encoding',
+    '主要建材':'one-hot-encoding',
+    '建物型態':'one-hot-encoding',
     '土地面積': 'min-max',
     '移轉層次': 'min-max',
     '總樓層數': 'min-max',
@@ -48,7 +47,7 @@ def main():
     train_dataset = HousePriceTrainDataset(data, target_column, normalize_columns)
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 
-    input_dim = len(normalize_columns.keys())-1
+    input_dim = 12 #len(normalize_columns.keys())-1
     print(input_dim)
     # Initialize model
     model = HousePriceModel(input_dim)
@@ -71,8 +70,9 @@ def main():
             # print(batch['target'].shape)
             if gpu:
                 data = batch['features']
-                data[0] = data[0].cuda()
-                data[1] = data[1].cuda()
+                for i in range(len(data)):
+                    data[i] = data[i].cuda()
+                
                 targets = batch['target'].cuda()
             else:
                 data = batch['features']

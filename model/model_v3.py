@@ -6,20 +6,33 @@ class HousePriceModel(nn.Module):
     def __init__(self, input_dim):
         super(HousePriceModel, self).__init__()
         self.fc1 = nn.Linear(input_dim, 64)
-        self.fc2 = nn.Linear(128, 64)
-        self.fc3 = nn.Linear(64, 1)
-        self.fc_c = nn.Linear(368, 64)
+        self.fc2 = nn.Linear(224, 128)
+        self.fc3 = nn.Linear(128, 64)
+        self.fc4 = nn.Linear(64, 32)
+        self.fc5 = nn.Linear(32, 1)
+
+        self.fc_c0 = nn.Linear(369, 32)
+        self.fc_c1 = nn.Linear(7, 32)
+        self.fc_c2 = nn.Linear(13, 32)
+        self.fc_c3 = nn.Linear(7, 32)
+        self.fc_c4 = nn.Linear(5, 32)
 
     def forward(self, x):
         # print(x[0].shape)
         # print(x[1].shape)      
-        x0 = F.relu(self.fc_c(x[0]))
-        x1 = F.relu(self.fc1(x[1]))
+        x0 = F.relu(self.fc_c0(x[0]))
+        x1 = F.relu(self.fc_c1(x[1]))
+        x2 = F.relu(self.fc_c2(x[2]))
+        x3 = F.relu(self.fc_c3(x[3]))
+        x4 = F.relu(self.fc_c4(x[4]))
+        x5 = F.relu(self.fc1(x[5]))
         # print(x0.shape)
         # print(x1.shape)
-        x = torch.cat((x0, x1), dim=1) 
+        x = torch.cat((x0,x1,x2,x3,x4,x5), dim=1) #160+64
         x = F.relu(self.fc2(x))
-        x = self.fc3(x)
+        x = F.relu(self.fc3(x))
+        x = F.relu(self.fc4(x))
+        x = self.fc5(x)
         return x
 
 

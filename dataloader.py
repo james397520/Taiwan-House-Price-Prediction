@@ -105,9 +105,20 @@ class HousePriceTrainDataset(Dataset):
     def __getitem__(self, idx):
         # print(self.features[idx])
         input = self.features[idx]
-        area_code = one_hot_encode(input[0],368)
+        # print("input[0]",input[0])
+        # print("input[1]",input[1])
+        # print("input[2]",input[2])
+        # print("input[3]",input[3])
+        # print("input[4]",input[4])
+        area_code = one_hot_encode(input[0],369)
+        building_class = one_hot_encode(input[1],7)
+        building_usage = one_hot_encode(input[2],13)
+        building_material = one_hot_encode(input[3],7)
+        building_style = one_hot_encode(input[4],5)
         # print('area_code',area_code.shape)
-        sample = {'features': [area_code,torch.tensor(input[1:], dtype=torch.float32)], 
+        sample = {'features': [area_code, building_class, building_usage,
+                               building_material, building_style,
+                               torch.tensor(input[5:], dtype=torch.float32)], 
                   'target': torch.tensor(self.target[idx], dtype=torch.float32)}
         return sample
 
@@ -135,9 +146,15 @@ class HousePriceTestDataset(Dataset):
 
     def __getitem__(self, idx):
         input = self.features[idx]
-        area_code = one_hot_encode(input[0],368)
+        area_code = one_hot_encode(input[0],369)
+        building_class = one_hot_encode(input[1],7)
+        building_usage = one_hot_encode(input[2],13)
+        building_material = one_hot_encode(input[3],7)
+        building_style = one_hot_encode(input[4],5)
         # print('area_code',area_code.shape)
-        sample = {'features': [area_code,torch.tensor(input[1:], dtype=torch.float32)]
+        sample = {'features': [area_code, building_class, building_usage,
+                               building_material, building_style,
+                               torch.tensor(input[5:], dtype=torch.float32)]
                   }
         return sample
 
