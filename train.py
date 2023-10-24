@@ -70,7 +70,9 @@ def main():
             # print(batch['features'].shape)
             # print(batch['target'].shape)
             if gpu:
-                data = batch['features'].cuda()
+                data = batch['features']
+                data[0] = data[0].cuda()
+                data[1] = data[1].cuda()
                 targets = batch['target'].cuda()
             else:
                 data = batch['features']
