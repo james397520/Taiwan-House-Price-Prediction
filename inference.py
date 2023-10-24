@@ -63,11 +63,13 @@ def inference():
     with torch.no_grad():
         for batch in data_loader:
             if gpu:
-                features = batch['features'].cuda()
+                data = batch['features']
+                data[0] = data[0].cuda()
+                data[1] = data[1].cuda()
             else:
-                features = batch['features']
+                data = batch['features']
             
-            predictions = model(features).cpu().numpy().flatten()
+            predictions = model(data).cpu().numpy().flatten()
 
     # Create a DataFrame to hold the IDs and predicted prices
     ids = [f"PU-{i}" for i in range(1, len(predictions) + 1)]  # Adjust ID format as needed
